@@ -1,19 +1,30 @@
 from src.embeddings import BaseEmbeddingModel
 from transformers import AutoModel
+from tqdm import tqdm
+
+import numpy as np
 
 
 class JinaEmbeddings(BaseEmbeddingModel):
     """
     Embedding model using the Jina embeddings model.
     """
-
     def __init__(self):
+        super().__init__("jina-embeddings-v3")
         self.model = AutoModel.from_pretrained(
             "jinaai/jina-embeddings-v3", trust_remote_code=True
         )
 
     def get_embeddings(self, sentences):
-        embeddings = self.model.encode(sentences, task="text-matching")
+        if len(sentences) > 1000:
+            batches = self.sentences_to_batches(sentences, batch_size=1000)
+        else:
+            batches = [sentences]
+        embeddings = []
+        for batch in tqdm(batches):
+            batch_embeddings = self.model.encode(batch, task="text-matching")
+            embeddings.append(batch_embeddings)
+        embeddings = np.concatenate(embeddings)
         return embeddings
 
     def get_similarity(self, sentence1, sentence2):

@@ -30,5 +30,4 @@ def load_model_and_infer():
 
 
 if __name__ == "__main__":
-    #main()
-    load_model_and_infer()
+    main()
