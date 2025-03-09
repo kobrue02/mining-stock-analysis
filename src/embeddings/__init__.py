@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import List
 
+import logging
 import numpy as np
 
 
@@ -13,7 +14,7 @@ class BaseEmbeddingModel(ABC):
         self.model_name = model_name
         self.model = None
         self.tokenizer = None
-        self.logger: logging.Logger = None
+        self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
 
     def get_embeddings(self, sentences: List[str]) -> np.array:
         """
