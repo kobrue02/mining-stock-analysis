@@ -9,6 +9,7 @@ class JinaEmbeddings(BaseEmbeddingModel):
     """
     Embedding model using the Jina embeddings model.
     """
+
     def __init__(self):
         super().__init__("jina-embeddings-v3")
         self.model = AutoModel.from_pretrained(

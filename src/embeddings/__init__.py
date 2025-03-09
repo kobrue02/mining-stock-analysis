@@ -15,6 +15,7 @@ class BaseEmbeddingModel(ABC):
         self.model = None
         self.tokenizer = None
         self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+        self.logger.propagate = False
 
     def get_embeddings(self, sentences: List[str]) -> np.array:
         """
@@ -27,8 +28,10 @@ class BaseEmbeddingModel(ABC):
             np.array: The embeddings for the provided sentences.
         """
         raise NotImplementedError
-    
-    def sentences_to_batches(self, sentences: List[str], batch_size: int) -> List[List[str]]:
+
+    def sentences_to_batches(
+        self, sentences: List[str], batch_size: int
+    ) -> List[List[str]]:
         """
         Convert the provided sentences to batches.
 
@@ -39,8 +42,12 @@ class BaseEmbeddingModel(ABC):
         Returns:
             List[List[str]]: The sentences converted to batches.
         """
-        batches = [sentences[i:i + batch_size] for i in range(0, len(sentences), batch_size)]
-        self.logger.info(f"Converted {len(sentences)} sentences to {len(batches)} batches.")
+        batches = [
+            sentences[i : i + batch_size] for i in range(0, len(sentences), batch_size)
+        ]
+        self.logger.info(
+            f"Converted {len(sentences)} sentences to {len(batches)} batches."
+        )
         return batches
 
     def get_similarity(self, sentence1: str, sentence2: str) -> float:

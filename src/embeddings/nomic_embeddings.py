@@ -8,6 +8,7 @@ from src.embeddings import BaseEmbeddingModel
 class NomicEmbeddings(BaseEmbeddingModel):
 
     def __init__(self, model_name="nomic-ai/nomic-embed-text-v2-moe"):
+        super().__init__(model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
 
