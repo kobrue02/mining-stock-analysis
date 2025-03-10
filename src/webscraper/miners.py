@@ -15,6 +15,7 @@ def get_press_release_date(headline, sleep=0):
         results = search(query, num_results=1, advanced=True)
         result = next(results)
     except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError):
+        tqdm.write("Rate limited, sleeping for {} seconds".format(sleep))
         time.sleep(sleep)
         return ""
     description = result.description
@@ -23,6 +24,7 @@ def get_press_release_date(headline, sleep=0):
         date = re.search(r"\d{1,2} [A-Za-z]{3} \d{4}", description).group()
         return datetime.strptime(date, "%d %b %Y").date()
     except AttributeError:
+        tqdm.write("Date not found in description: {}".format(description))
         return ""
 
     
