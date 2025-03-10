@@ -50,5 +50,18 @@ def predict_mining_stock():
     pipeline.run_train_test_eval(save_model=True)
 
 
+def best_nr_reports():
+    df = pd.read_csv("data/mining_headlines.csv")
+    # remove all columns with "N/A" in the date column
+    df = df[df["date"] != "N/A"]
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.dropna()
+    pipe = Pipeline(news_reports=df, exchange="TSX")
+    nbest = pipe.get_best_two_nr_reports()
+    
+    nbest_df = pd.DataFrame(nbest, columns=["report_1", "report_2", "advance_percentage", "date_r1", "date_r2"])
+    print(nbest_df)
+
+
 if __name__ == "__main__":
-    predict_mining_stock()
+    best_nr_reports()

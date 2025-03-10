@@ -4,9 +4,13 @@ Module for the pipeline class and related functions.
 
 from src.classifier import train_test_split, classification_report, BaseClassifier
 from src.embeddings import BaseEmbeddingModel
+from src.market_data import TimeSeriesDaily
+from src.market_data.yfinance_api import YFinanceAccess
 
 import logging
 import os
+import pandas as pd
+
 
 
 class Pipeline:
@@ -16,9 +20,12 @@ class Pipeline:
 
     def __init__(
         self,
-        data,
-        classifier: BaseClassifier,
-        embeddings: BaseEmbeddingModel,
+        data = None,
+        classifier: BaseClassifier = None,
+        embeddings: BaseEmbeddingModel = None,
+        timeseries: TimeSeriesDaily = None,
+        news_reports: pd.DataFrame = None,
+        exchange: str = "TSX",
     ):
         """
         Initialize the pipeline.
@@ -31,6 +38,11 @@ class Pipeline:
         self.data = data
         self.classifier = classifier
         self.embeddings = embeddings
+        self.timeseries = timeseries
+        self.exchange = exchange
+        self.news_reports = news_reports
+
+        self.yf = YFinanceAccess()
 
         self._init_logger()
         self._assert_data()
@@ -48,6 +60,8 @@ class Pipeline:
 
     def _assert_data(self):
         """Assert that the data is in the correct format."""
+        if not self.data:
+            return
         assert "text" in self.data, "Data must contain a 'text' column."
         assert "label" in self.data, "Data must contain a 'label' column."
         assert len(self.data["text"]) == len(
@@ -94,3 +108,46 @@ class Pipeline:
         prediction = self.classifier.predict(embeddings)
         print(prediction)
         return prediction
+    
+    def get_best_two_nr_reports(self):
+        """
+        Get the two news reports with the highest stock advance percentage.
+        """
+        if self.news_reports is None:
+            return None
+
+        stocks = self.news_reports["company"].unique()
+        report_pairs = []
+        for stock in stocks:
+            company_candidates = []
+            stock_reports = self.news_reports[self.news_reports["company"] == stock]
+            time_range = stock_reports["date"].min(), stock_reports["date"].max()
+            if self.exchange == "TSX":
+                stock_data = self.yf.historic_tsx_data(stock)
+            elif self.exchange == "NYSE":
+                stock_data = self.yf.historic_nyse_data(stock)
+            else:
+                raise ValueError("Exchange must be 'TSX' or 'NYSE'.")
+            
+            # for any combination of two news reports for this stock
+            # check the stock advance percentage
+            for i in range(len(stock_reports)):
+                for j in range(i + 1, len(stock_reports)):
+                    # date j must be after date i
+                    if stock_reports.iloc[i]["date"] > stock_reports.iloc[j]["date"]:
+                        break
+                    report1 = stock_reports.iloc[i]
+                    report2 = stock_reports.iloc[j]
+                    date1 = report1["date"]
+                    date2 = report2["date"]
+                    self.logger.info(f"Comparing {date1} and {date2} for {stock}.")
+                    diff_price, diff_percentage = stock_data.diff_between_dates(date1, date2)
+                    company_candidates.append((report1["headline"], report2["headline"], diff_percentage, date1, date2))
+            
+            report_pairs.extend(company_candidates)
+        
+        # sort by stock advance percentage
+        report_pairs.sort(key=lambda x: x[2], reverse=True)
+
+        return report_pairs
+
