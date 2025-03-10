@@ -21,8 +21,14 @@ def get_press_release_date(headline, sleep=0):
     description = result.description
     try:
         # date format usually "20 Feb 2025"
-        date = re.search(r"\d{1,2} [A-Za-z]{3} \d{4}", description).group()
-        return datetime.strptime(date, "%d %b %Y").date()
+        date = re.search(r"\d{1,2} [A-Za-z]{3} \d{4}", description)
+        format = "%d %b %Y"
+        # or "Feb 20, 2025"
+        if not date:
+            date = re.search(r"[A-Za-z]{3} \d{1,2}, \d{4}", description)
+            format = "%b %d, %Y"
+        date = date.group()
+        return datetime.strptime(date, format).date()
     except AttributeError:
         tqdm.write("Date not found in description: {}".format(description))
         return ""
