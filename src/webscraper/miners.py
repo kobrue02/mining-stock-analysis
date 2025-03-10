@@ -12,7 +12,7 @@ from tqdm import tqdm
 def get_press_release_date(headline, sleep=0):
     query = "Junior Mining Network: " + headline
     try:
-        results = search(query, num_results=1, advanced=True, sleep_interval=3, timeout=5)
+        results = search(query, num_results=1, advanced=True)
         result = next(results)
     except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError):
         time.sleep(sleep)
