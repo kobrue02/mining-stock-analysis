@@ -28,7 +28,11 @@ def get_press_release_date(headline, sleep=0):
             date = re.search(r"[A-Za-z]{3} \d{1,2}, \d{4}", description)
             format = "%b %d, %Y"
         date = date.group()
-        return datetime.strptime(date, format).date()
+        try:
+            return datetime.strptime(date, format).date()
+        except ValueError:
+            tqdm.write("Date not in correct format: {}".format(description))
+            return ""
     except AttributeError:
         tqdm.write("Date not found in description: {}".format(description))
         return ""
