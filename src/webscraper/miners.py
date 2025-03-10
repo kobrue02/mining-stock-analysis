@@ -140,4 +140,4 @@ if __name__ == "__main__":
     df = m.to_df()
     print(df)
     print(f"Number of news headlines: {len(df)}")
-    print(f"Included companies: {", ".join(df['company'].unique())}")
+    print(f"Included companies: {', '.join(df['company'].unique())}")
