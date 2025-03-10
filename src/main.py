@@ -8,6 +8,7 @@ from src.utils.data_loaders import (
     load_headline_dataset,
 )
 from src.webscraper.junior_mining_network import JMNScraper
+from src.webscraper.miners import MiningWebsiteAccess
 
 import pandas as pd
 
@@ -37,9 +38,17 @@ def vectorize_jmn_headlines():
     jina = JinaEmbeddings()
     embeddings = jina.get_embeddings(df["headline"].tolist())
     return embeddings
-    
+
+
+def predict_mining_stock():
+    scraper = MiningWebsiteAccess()
+    df = scraper.to_df()
+    df.rename(columns={"headline": "text", "company": "label"}, inplace=True)
+    embeddings = JinaEmbeddings()
+    classifier = CNNClassifier()
+    pipeline = Pipeline(data=df, embeddings=embeddings, classifier=classifier)
+    pipeline.run_train_test_eval(save_model=True)
 
 
 if __name__ == "__main__":
-    e = vectorize_jmn_headlines()
-    print(e)
+    predict_mining_stock()

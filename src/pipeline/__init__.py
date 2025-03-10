@@ -59,7 +59,10 @@ class Pipeline:
         Train and evaluate the classifier using the provided data.
         """
         train_X, test_X, train_y, test_y = train_test_split(
-            self.data["text"], self.data["label"], random_state=42
+            self.data["text"],
+            self.data["label"],
+            random_state=42,
+            stratify=self.data["label"],
         )
         train_X = self.embeddings.transform_sentences(train_X)
         test_X = self.embeddings.transform_sentences(test_X)
