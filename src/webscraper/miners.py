@@ -5,7 +5,7 @@ import time
 
 from bs4 import BeautifulSoup
 from datetime import datetime
-from googlesearch import search, SearchResult
+from googlesearch import search
 from tqdm import tqdm
 
 
