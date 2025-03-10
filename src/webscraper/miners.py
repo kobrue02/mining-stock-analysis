@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import requests
 import re
@@ -8,6 +9,8 @@ from datetime import datetime
 from googlesearch import search
 from tqdm import tqdm
 
+logger = logging.getLogger(__name__)
+
 
 def get_press_release_date(headline, sleep=0):
     query = "Junior Mining Network: " + headline
@@ -15,7 +18,7 @@ def get_press_release_date(headline, sleep=0):
         results = search(query, num_results=1, advanced=True)
         result = next(results)
     except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError):
-        tqdm.write("Rate limited, sleeping for {} seconds".format(sleep))
+        logger.warning(str("Rate limited, sleeping for {} seconds".format(sleep)))
         time.sleep(sleep)
         return ""
     description = result.description
@@ -31,10 +34,10 @@ def get_press_release_date(headline, sleep=0):
         try:
             return datetime.strptime(date, format).date()
         except ValueError:
-            tqdm.write("Date not in correct format: {}".format(description))
+            logger.warning(str("Date not in correct format: {}".format(description)))
             return ""
     except AttributeError:
-        tqdm.write("Date not found in description: {}".format(description))
+        logger.warning(str("Date not found in description: {}".format(description)))
         return ""
 
     
